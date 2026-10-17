@@ -1,0 +1,22 @@
+{
+  "name": "circadia",
+  "version": "1.0.0",
+  "description": "Circadia Smart Wake Continuous Running Prototype",
+  "main": "app.js",
+  "scripts": {
+    "build": "zeus build",
+    "preview": "zeus preview -t \"Amazfit Balance\"",
+    "preview:select": "zeus preview",
+    "dev": "zeus dev -t \"Amazfit Balance\"",
+    "dev:select": "zeus dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@zeppos/device-types": "^3.0.0"
+  },
+  "dependencies": {
+    "@zeppos/zml": "^0.0.38"
+  }
+}

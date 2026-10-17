@@ -1,0 +1,68 @@
+---
+title: LocalStorage
+sidebar_label: LocalStorage
+---
+
+> Start from API_LEVEL `3.0` . Please refer to [API_LEVEL](../../../../guides/framework/device/compatibility.md).
+
+Locally stored key-value pairs, data cleared after Mini Program uninstallation. An instance keeps loaded data in memory, making it suitable for repeated reads and writes by reducing repeated file reads.
+
+:::info
+permission code: `device:os.local_storage`
+:::
+
+## Constructor
+
+Create a local storage instance. Uses the Mini Program local storage file by default, or a custom file path.
+
+```ts
+constructor(storagePath?: string)
+```
+
+## Methods
+
+### setItem
+
+Save data
+
+```ts
+setItem(key: string, value: unknown): void
+```
+
+### getItem
+
+Read the data, specify the default value `defaultValue`, and return `defaultValue` if the value on the specified `key` is not retrieved.
+
+```ts
+getItem<T = unknown>(key: string, defaultValue?: T): T | undefined
+```
+
+### removeItem
+
+Delete the data of the specified `key`
+
+```ts
+removeItem(key: string): boolean
+```
+
+### clear
+
+Clear all data in localStorage
+
+```ts
+clear(): void
+```
+
+## Example
+
+```js
+import { LocalStorage } from '@zos/storage'
+
+const localStorage = new LocalStorage()
+localStorage.setItem('test', 'test value')
+const val = localStorage.getItem('test')
+const defaultValue = localStorage.getItem('none_key', 'defaultValue')
+
+localStorage.removeItem('test')
+localStorage.clear()
+```

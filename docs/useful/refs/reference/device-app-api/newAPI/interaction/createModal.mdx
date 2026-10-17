@@ -1,0 +1,75 @@
+# createModal
+
+> Start from API_LEVEL `2.0` . Please refer to [API_LEVEL](../../../../guides/framework/device/compatibility.md).
+
+![createModal_image](https://img-cdn.huami.com/20220927/9a9ce61a400f089c984951ca71c6f9b0.jpg)
+
+Create Modal prompt box.
+
+## Type
+
+```ts
+function createModal(option: Option): Modal
+```
+
+## Parameters
+
+### Option
+
+| Property      | Type                                      | Required | DefaultValue          | Description                                                                                             | API_LEVEL |
+| ------------- | ----------------------------------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------- | --------- |
+| content       | <code>string</code>                       | Y        | -                     | title of Modal                                                                                          | 2.0       |
+| title         | <code>string</code>                       | N        | -                     | Modal dialog box title, alias for `content`                                                             | 3.6       |
+| show          | <code>boolean</code>                      | N        | <code>true</code>     | Whether to display Modal immediately after the creation is completed                                    | 2.0       |
+| onClick       | <code>(keyObj: KeyObj) =&#62; void</code> | N        | -                     | Whether to display Modal immediately                                                                    | 2.0       |
+| autoHide      | <code>boolean</code>                      | N        | <code>true</code>     | Whether to automatically close the Modal dialog after clicking the Confirm or Cancel button             | 2.0       |
+| subtitle      | <code>string</code>                       | N        | -                     | subtitle                                                                                                | 3.6       |
+| src           | <code>string</code>                       | N        | -                     | Icon icon path                                                                                          | 3.6       |
+| text          | <code>string</code>                       | N        | -                     | text content                                                                                            | 3.6       |
+| textColor     | <code>number</code>                       | N        | <code>0xFFFFFF</code> | text color                                                                                              | 3.6       |
+| textAlpha     | <code>number</code>                       | N        | <code>255</code>      | Text transparency, transparency [0-255], 0 is full transparency                                         | 3.6       |
+| okButton      | <code>string</code>                       | N        | -                     | The icon path of the confirmation button                                                                | 3.6       |
+| cancelButton  | <code>string</code>                       | N        | -                     | Cancel button icon icon path                                                                            | 3.6       |
+| capsuleButton | <code>Array&#60;string&#62;</code>        | N        | -                     | Capsule button configuration, as a string array, click `type` in the returned KeyObj starting from `10` | 3.6       |
+
+### KeyObj
+
+| Property | Type                | Description                                              | API_LEVEL |
+| -------- | ------------------- | -------------------------------------------------------- | --------- |
+| type     | <code>number</code> | Modal key name, value reference Modal key name constants | 2.0       |
+
+### Modal
+
+| Property | Type                                       | Description        | API_LEVEL |
+| -------- | ------------------------------------------ | ------------------ | --------- |
+| show     | <code>(isShow: boolean) =&#62; void</code> | Show or hide Modal | 2.0       |
+
+## Constants
+
+### Modal key name constants
+
+| Constant        | Description          | API_LEVEL |
+| --------------- | -------------------- | --------- |
+| `MODAL_CONFIRM` | Modal Confirm button | 2.0       |
+| `MODAL_CANCEL`  | Modal Cancel button  | 2.0       |
+
+## Example
+
+```js
+import { createModal, MODAL_CONFIRM } from '@zos/interaction'
+
+const dialog = createModal({
+  content: 'hello world',
+  autoHide: false,
+  onClick: (keyObj) => {
+    const { type } = keyObj
+    if (type === MODAL_CONFIRM) {
+      console.log('confirm')
+    } else {
+      dialog.show(false)
+    }
+  },
+})
+
+dialog.show(true)
+```

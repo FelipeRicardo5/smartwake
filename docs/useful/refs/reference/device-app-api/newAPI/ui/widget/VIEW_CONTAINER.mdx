@@ -1,0 +1,308 @@
+---
+title: VIEW_CONTAINER
+sidebar_label: VIEW_CONTAINER
+---
+
+import useBaseUrl from '@docusaurus/useBaseUrl'
+
+> Start from API_LEVEL `2.0` . Please refer to [API_LEVEL](../../../../../guides/framework/device/compatibility.md).
+
+<div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+  <img src={useBaseUrl('/img/api/view_container_sample.gif')} width="50%" title="vc_showcase" />
+  <img src={useBaseUrl('/img/api/swiper_vc.gif')} width="50%" title="vc_showcase2" />
+</div>
+
+The `VIEW_CONTAINER` widget container is a very powerful layout widget with the following features.
+
+- It is a rectangular layout container that can create child widgets by its instance method
+- The `z_index` property controls the cascading order of the widget container, allowing for vertical cascading of widgets. And you can create multiple VIEW_CONTAINER widgets in the same page. In Zepp OS v3, you can create up to 7
+- The VIEW_CONTAINER widget container itself supports scrolling and can be used as a scrolling container
+- Used with [`setScrollMode`](../../page/setScrollMode.mdx) Swiper mode to achieve the complex layout in the second GIF (full-screen scrolling, where each screen can also be viewed as a scrollable independent container)
+
+## Create UI widget
+
+```js
+import { createWidget, widget } from '@zos/ui'
+
+const viewContainer = createWidget(widget.VIEW_CONTAINER, Param)
+
+// Creating UI sub-widgets
+viewContainer.createWidget(xxx, xxx)
+```
+
+## Type
+
+## Param: object
+
+| Properties | Description | Required | Type | API_LEVEL |
+| --- | --- | --- | --- | --- |
+| x | Widget x-coordinate, default `0` | NO | `number` | 2.0 |
+| y | Widget y-coordinate, default `0` | NO | `number` | 2.0 |
+| w | Widget width, default screen width | NO | `number` | 2.0 |
+| h | Widget height, default screen height | NO | `number` | 2.0 |
+| scroll_enable | When the layout of widgets in VIEW_CONTAINER exceeds the width/height, it is considered a long page. `0`: disable scrolling, you can set container scroll position offset by `pos_x` or `pos_y`; `1`: allow scrolling (default) | NO | `number` | 2.0 |
+| pos_x | When VIEW_CONTAINER is a long horizontal page layout, you can read/set the horizontal offset | NO | `number` | 2.0 |
+| pos_y | When VIEW_CONTAINER is a long vertical page layout, you can read/set the vertical offset | NO | `number` | 2.0 |
+| z_index | When using multiple VIEW_CONTAINER widgets, the cascading relationship can be controlled by this field, with `0` at the bottom by default | NO | `number` | 2.0 |
+| modal | Modal layer switch. `0`: disable; `1`: enable (default). When enabled, it can be used to create a modal overlay/dialog inside a `VIEW_CONTAINER` and block the base layer from scrolling. | NO | `number` | 2.0 |
+| bounce | Rebound effect, `0`: disabled, `1`: enabled (default) | NO | `number` | 3.0 |
+| page | Used with [`setScrollMode`](../../page/setScrollMode.mdx) Swiper mode. The entire screen uses Swiper mode, and each independent page is implemented using `VIEW_CONTAINER`. Marks the page index to coordinate with Swiper mode | NO | `number` | 3.0 |
+
+### FrameParams: object
+
+| Properties | Description                                                                                                              | Type     | API_LEVEL |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ | -------- | --------- |
+| type       | `0`: the user is still touching the screen and dragging, `1`: the user has let go and is in an inertial scrolling effect | `number` | 2.0       |
+| yoffset    | y-axis offset pixels                                                                                                     | `number` | 3.0       |
+
+## Supported Property Access List
+
+| Properties           | setProperty | getProperty | [setter](../gettersetter.mdx) | [getter](../gettersetter.mdx) |
+| -------------------- | ----------- | ----------- | ----------------------------- | ----------------------------- |
+| x                    | Y           | Y           | Y                             | Y                             |
+| y                    | Y           | Y           | Y                             | Y                             |
+| w                    | Y           | Y           | Y                             | Y                             |
+| h                    | Y           | Y           | Y                             | Y                             |
+| pos_x                | Y           | Y           | Y                             | Y                             |
+| pos_y                | Y           | Y           | Y                             | Y                             |
+| page                 | N           | N           | N                             | Y                             |
+| modal                | N           | N           | N                             | Y                             |
+| z_index              | N           | N           | N                             | Y                             |
+| bounce               | N           | N           | N                             | Y                             |
+| scroll_enable        | N           | Y           | N                             | Y                             |
+| scroll_frame_func    | N           | N           | N                             | N                             |
+| scroll_complete_func | N           | N           | N                             | N                             |
+
+## Code example
+
+The code runs as shown in the image at the top of the document, creating two VIEW_CONTAINER widgets
+
+```js
+import { createWidget, widget, text_style, align } from '@zos/ui'
+import { px } from '@zos/utils'
+
+const getRandomColor = () => {
+  const randomArr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+
+  function getRandomFromSection(low, high) {
+    const RANDOM = Math.random()
+    const RANGE = high - low + 1
+
+    return Math.floor(RANDOM * RANGE) + low
+  }
+
+  const colorStr = Array.from({ length: 6 }).reduce((prev, curr) => {
+    const random = getRandomFromSection(0, 15)
+    return prev + randomArr[random]
+  }, '0x')
+
+  return Number(colorStr)
+}
+
+Page({
+  build() {
+    createWidget(widget.TEXT, {
+      x: px(96),
+      y: px(40),
+      w: px(288),
+      h: px(46),
+      color: 0xffffff,
+      text_size: px(36),
+      align_h: align.CENTER_H,
+      align_v: align.CENTER_V,
+      text_style: text_style.NONE,
+      text: 'VIEW_CONTAINER'
+    })
+
+    const viewContainer = createWidget(widget.VIEW_CONTAINER, {
+      x: px(0),
+      y: px(86),
+      w: px(480),
+      h: px(400)
+    })
+
+    Array.from({ length: 5 }).forEach((_, index) => {
+      viewContainer.createWidget(widget.FILL_RECT, {
+        x: 0,
+        y: px(index * 400),
+        w: px(480),
+        h: px(400),
+        color: getRandomColor()
+      })
+
+      viewContainer.createWidget(widget.TEXT, {
+        x: px(96),
+        y: px(170) + px(index * 400),
+        w: px(288),
+        h: px(46),
+        text_size: px(36),
+        color: 0xffffff,
+        align_h: align.CENTER_H,
+        align_v: align.CENTER_V,
+        text: `INDEX: ${index}`
+      })
+    })
+
+    const viewContainerButton = createWidget(widget.VIEW_CONTAINER, {
+      x: px(0),
+      y: px(86),
+      w: px(480),
+      h: px(400),
+      z_index: 1,
+      scroll_enable: false
+    })
+
+    viewContainerButton.createWidget(widget.BUTTON, {
+      x: 0,
+      y: px(50),
+      w: px(200),
+      h: px(100),
+      text: 'Click',
+      radius: px(12),
+      normal_color: DEFAULT_COLOR,
+      press_color: DEFAULT_COLOR_TRANSPARENT,
+      click_func: () => {
+        console.log('click button')
+      }
+    })
+  }
+})
+```
+
+Used in conjunction with SetScrollMode Swiper mode, the effect is shown in the second GIF at the top.
+
+```js
+import { createWidget, widget, align } from "@zos/ui";
+import { px } from "@zos/utils";
+import { setScrollMode, SCROLL_MODE_SWIPER_HORIZONTAL } from "@zos/page";
+
+const PAGE_WIDTH = 480;
+const PAGE_HEIGHT = 480;
+
+Page({
+  build() {
+    setScrollMode({
+      mode: SCROLL_MODE_SWIPER_HORIZONTAL,
+      options: {
+        width: px(PAGE_WIDTH),
+        count: 2,
+      },
+    });
+
+    const viewContainer1 = createWidget(widget.VIEW_CONTAINER, {
+      x: px(0),
+      y: px(0),
+      w: px(PAGE_WIDTH),
+      h: px(PAGE_HEIGHT),
+      scroll_enable: 1,
+      page: 0,
+    });
+
+    viewContainer1.createWidget(widget.TEXT, {
+      x: 0,
+      y: 0,
+      w: px(PAGE_WIDTH),
+      h: px(40),
+      text: "ViewContainer1",
+      text_size: px(26),
+      color: 0xffffff,
+      align_h: align.CENTER_H,
+      align_v: align.CENTER_V,
+    });
+
+    viewContainer1.createWidget(widget.FILL_RECT, {
+      x: 0,
+      y: px(40),
+      w: px(PAGE_WIDTH),
+      h: px(440),
+      color: 0xF84E3F,
+    });
+
+    viewContainer1.createWidget(widget.FILL_RECT, {
+      x: 0,
+      y: px(480),
+      w: px(PAGE_WIDTH),
+      h: px(480),
+      color: 0x42A5F5,
+    });
+
+    const viewContainer2 = createWidget(widget.VIEW_CONTAINER, {
+      x: px(0),
+      y: px(0),
+      w: px(PAGE_WIDTH),
+      h: px(PAGE_HEIGHT),
+      scroll_enable: 1,
+      page: 1,
+    });
+
+    viewContainer2.createWidget(widget.TEXT, {
+      x: 0,
+      y: 0,
+      w: px(PAGE_WIDTH),
+      h: px(40),
+      text: "ViewContainer2",
+      text_size: px(26),
+      color: 0xffffff,
+      align_h: align.CENTER_H,
+      align_v: align.CENTER_V,
+    });
+
+    viewContainer2.createWidget(widget.FILL_RECT, {
+      x: 0,
+      y: px(40),
+      w: px(PAGE_WIDTH),
+      h: px(PAGE_HEIGHT) / 2,
+      color: 0xFFA726,
+    });
+
+    viewContainer2.createWidget(widget.FILL_RECT, {
+      x: 0,
+      y: px(280),
+      w: px(PAGE_WIDTH),
+      h: px(PAGE_HEIGHT) / 2,
+      color: 0xFFD54F,
+    });
+
+    viewContainer2.createWidget(widget.FILL_RECT, {
+      x: 0,
+      y: px(40) + px(PAGE_HEIGHT),
+      w: px(PAGE_WIDTH),
+      h: px(PAGE_HEIGHT) / 2,
+      color: 0x66BB6A,
+    });
+  },
+});
+```
+## Additional Examples
+
+### Example 1
+
+```js
+import { createWidget, widget } from '@zos/ui'
+
+const vc = createWidget(widget.VIEW_CONTAINER, {
+  x: 0,
+  y: 0,
+  w: 416,
+  h: 416,
+  page: 1,
+  scroll_enable: 1,
+  scroll_frame_func: (info) => {
+    console.log('scrolling', info)
+  },
+  scroll_complete_func: (info) => {
+    console.log('scrolled', info)
+  },
+})
+
+vc.createWidget(widget.TEXT, {
+  x: 150,
+  y: 416,
+  w: 200,
+  h: 50,
+  color: 0xffffff,
+  text_size: 30,
+  text: 'hello1',
+})
+```
+

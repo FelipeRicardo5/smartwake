@@ -1,0 +1,31 @@
+# emitCustomSystemEvent
+
+> Start from API_LEVEL `3.0` . Please refer to [API_LEVEL](../../../../guides/framework/device/compatibility.md).
+
+The Mini Program can customize the system events and can actively dispatch the custom system events.
+
+## Type
+
+```ts
+function emitCustomSystemEvent(option: Option): void
+```
+
+## Parameters
+
+### Option
+
+| Property   | Type                | Required | DefaultValue | Description                                                                                                          | API_LEVEL |
+| ---------- | ------------------- | -------- | ------------ | -------------------------------------------------------------------------------------------------------------------- | --------- |
+| eventName  | <code>string</code> | Y        | -            | Customize event names that meet the naming convention of `event:customize.${event}`                                  | 3.0       |
+| eventParam | <code>string</code> | Y        | -            | Custom event parameters, this parameter is passed to the `onInit` lifecycle function of the `AppService` constructor | 3.0       |
+
+## Example
+
+```js
+import { emitCustomSystemEvent } from '@zos/app'
+
+emitCustomSystemEvent({
+  eventName: 'event:customize.test',
+  eventParam: 'eventName=event:customize.test&type=0',
+})
+```

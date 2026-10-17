@@ -1,0 +1,123 @@
+---
+title: Accelerometer
+sidebar_label: Accelerometer
+---
+
+> Start from API_LEVEL `3.0` . Please refer to [API_LEVEL](../../../../guides/framework/device/compatibility.md).
+
+![Accelerometer_image](https://img-cdn.zepp.com/20231219/04be57a185e1632a0467ea8d094f55da.jpeg)
+
+accelerometer. Measure the acceleration of the device along three orthogonal axes (x, y, z). The x and y axes are parallel to the screen, with the positive direction referring to the diagram. The z-axis is perpendicular to the device's screen, with the positive direction pointing upward.
+
+:::info
+permission code: `device:os.accelerometer`
+:::
+
+## Methods
+
+### start
+
+Start listening to accelerometer data
+
+```ts
+start(): void
+```
+
+### stop
+
+Stop listening to accelerometer data
+
+```ts
+stop(): void
+```
+
+### getCurrent
+
+Get current accelerometer data
+
+```ts
+getCurrent(): Result
+```
+
+#### Result
+
+| Property | Type                | Description                      | API_LEVEL |
+| -------- | ------------------- | -------------------------------- | --------- |
+| x        | <code>number</code> | Acceleration of x-axis in cm/s^2 | 3.0       |
+| y        | <code>number</code> | Acceleration of y-axis in cm/s^2 | 3.0       |
+| z        | <code>number</code> | Acceleration of z-axis in cm/s^2 | 3.0       |
+
+### onChange
+
+Register the accelerometer data change event listener callback function
+
+```ts
+onChange(callback: () => void): void
+```
+
+### offChange
+
+Cancel the accelerometer data change event listener callback function
+
+```ts
+offChange(callback: () => void): void
+```
+
+### setFreqMode
+
+> Start from API_LEVEL `3.0`
+
+Set the mode of trigger frequency, `mode` value reference frequency mode constant
+
+```ts
+setFreqMode(mode: number): void
+```
+
+#### Constants
+
+##### Frequency Mode
+
+| Constant           | Description                                             | API_LEVEL |
+| ------------------ | ------------------------------------------------------- | --------- |
+| `FREQ_MODE_LOW`    | Low power mode with low trigger frequency               | 3.0       |
+| `FREQ_MODE_NORMAL` | Normal power consumption mode, medium trigger frequency | 3.0       |
+| `FREQ_MODE_HIGH`   | High power consumption mode with high trigger frequency | 3.0       |
+
+### getFreqMode
+
+> Start from API_LEVEL `3.0`
+
+Get the mode of trigger frequency, result value reference frequency mode constant
+
+```ts
+getFreqMode(): number
+```
+
+#### Constants
+
+##### Frequency Mode
+
+| Constant           | Description                                             | API_LEVEL |
+| ------------------ | ------------------------------------------------------- | --------- |
+| `FREQ_MODE_LOW`    | Low power mode with low trigger frequency               | 3.0       |
+| `FREQ_MODE_NORMAL` | Normal power consumption mode, medium trigger frequency | 3.0       |
+| `FREQ_MODE_HIGH`   | High power consumption mode with high trigger frequency | 3.0       |
+
+## Example
+
+```js
+import { Accelerometer, FREQ_MODE_NORMAL } from '@zos/sensor'
+
+const accelerometer = new Accelerometer()
+
+const callback = () => {
+  console.log(accelerometer.getCurrent())
+}
+accelerometer.onChange(callback)
+accelerometer.setFreqMode(FREQ_MODE_NORMAL)
+accelerometer.start()
+
+// When not needed for use
+accelerometer.offChange()
+accelerometer.stop()
+```

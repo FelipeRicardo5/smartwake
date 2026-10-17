@@ -1,0 +1,105 @@
+---
+title: TIME_PICKER
+sidebar_label: TIME_PICKER
+---
+
+> Start from API_LEVEL `3.6`. Please refer to [API_LEVEL](../../../../../guides/framework/device/compatibility.md)。
+
+![time_picker](/img/api/time_picker.jpg)
+
+A full-screen widget that supports time and date selection.
+
+## Create UI widget
+
+```js
+import { createWidget, widget, prop } from '@zos/ui'
+
+const time_picker = createWidget(widget.WIDGET_TIME_PICKER, Param)
+```
+
+### Param: object
+
+| Properties         | Description                         | Required | Type       |
+| ------------------ | ----------------------------------- | -------- | ---------- |
+| `type`             | Selector type, `0` time, `1` date   | YES      | `number`   |
+| `style`            | Value must be `1`                   | YES      | `number`   |
+| `title`            | Title of selector                   | NO       | `string`   |
+| `done_icon`        | Image path of done icon             | NO       | `string`   |
+| `font_size`        | Font size setting                   | YES      | `number`   |
+| `select_font_size` | Font size setting for selected item | YES      | `number`   |
+| `initHour`         | Initial hour, default is 12         | NO       | `number`   |
+| `initMin`          | Initial minute, default is 0        | NO       | `number`   |
+| `startYear`        | Start year, default is 1970         | NO       | `number`   |
+| `endYear`          | End year, default is 2100           | NO       | `number`   |
+| `initYear`         | Initial year, default is 2020       | NO       | `number`   |
+| `initMonth`        | Initial month, default is 1         | NO       | `number`   |
+| `initDay`          | Initial day, default is 1           | NO       | `number`   |
+| `picker_cb`        | Callback function of picker         | NO       | `CallBack` |
+
+#### CallBack: function
+
+Time/Date picker callback function
+
+```ts
+picker_cb(picker: WIDGET, event_type: number, column: number, value_index: number): void
+```
+
+| Properties    | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| `picker`      | The time/date picker widget instance                               |
+| `event_type`  | Event type of picker, see `EVENT_TYPE`                             |
+| `column`      | Index of current focus column (only valid under UPDATE event type) |
+| `value_index` | Current value of the column (only valid under UPDATE event type)   |
+
+| EVENT_TYPE Value | Description        |
+| ---------------- | ------------------ |
+| `0`              | Cancel selection   |
+| `1`              | Update selection   |
+| `2`              | Complete selection |
+
+## Property Operations
+
+The `SET` and `GET` means `widget.setProperty` and `widget.getProperty`
+
+| Property Name           | SET/GET | Description |
+| ----------------------- | ------- | ----------- |
+| `prop.type`             | -       | -           |
+| `prop.style`            | -       | -           |
+| `prop.title`            | -       | -           |
+| `prop.done_icon`        | -       | -           |
+| `prop.font_size`        | -       | -           |
+| `prop.select_font_size` | -       | -           |
+| `prop.initHour`         | -       | -           |
+| `prop.initMin`          | -       | -           |
+| `prop.startYear`        | -       | -           |
+| `prop.endYear`          | -       | -           |
+| `prop.initYear`         | -       | -           |
+| `prop.initMonth`        | -       | -           |
+| `prop.initDay`          | -       | -           |
+| `prop.picker_cb`        | -       | -           |
+| `prop.YEAR`             | `GET`   | Get year    |
+| `prop.MONTH`            | `GET`   | Get month   |
+| `prop.DAY`              | `GET`   | Get day     |
+| `prop.HOUR`             | `GET`   | Get hour    |
+| `prop.MINUTE`           | `GET`   | Get minute  |
+
+## Code example
+
+```js
+import { createWidget, widget, prop } from '@zos/ui'
+
+const time_picker = createWidget(widget.WIDGET_TIME_PICKER, {
+  type: 0, // 0: select time  1: select date
+  style: 1,
+  title: 'Time Picker',
+  initHour: 16,
+  initMin: 55,
+  font_size: 45,
+  select_font_size: 48,
+  picker_cb: callbackFunc
+})
+
+function callbackFunc(picker, event_type, column, value_index) {
+  console.log('timePickerCb: ' + event_type, 'column: ' + column, 'value_index: ' + value_index)
+}
+```
