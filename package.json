@@ -1,7 +1,7 @@
 {
-  "name": "circadia",
+  "name": "smart-wake",
   "version": "1.0.0",
-  "description": "Circadia Smart Wake Continuous Running Prototype",
+  "description": "Smart Wake Continuous Running Prototype",
   "main": "app.js",
   "scripts": {
     "build": "zeus build",

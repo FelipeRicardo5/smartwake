@@ -2,15 +2,15 @@
   "configVersion": "v3",
   "app": {
     "appId": 22062,
-    "appName": "Circadia",
+    "appName": "Smart Wake",
     "appType": "app",
     "version": {
       "code": 1,
       "name": "1.0.0"
     },
     "icon": "icon.png",
-    "vender": "Circadia",
-    "description": "Circadia Smart Wake Continuous Running Prototype"
+    "vender": "Smart Wake",
+    "description": "Smart Wake Continuous Running Prototype"
   },
   "permissions": [
     "data:os.device.info",
@@ -53,13 +53,13 @@
   },
   "i18n": {
     "en-US": {
-      "appName": "Circadia"
+      "appName": "Smart Wake"
     },
     "pt-BR": {
-      "appName": "Circadia"
+      "appName": "Smart Wake"
     },
     "zh-CN": {
-      "appName": "Circadia"
+      "appName": "Smart Wake"
     }
   },
   "defaultLanguage": "en-US"
