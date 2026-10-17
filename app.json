@@ -38,6 +38,9 @@
           "services": [
             "app-service/smart_wake"
           ]
+        },
+        "app-side": {
+          "path": "app-side/index"
         }
       },
       "platforms": [
@@ -49,6 +52,11 @@
         }
       ],
       "designWidth": 480
+    }
+  },
+  "module": {
+    "app-side": {
+      "path": "app-side/index"
     }
   },
   "i18n": {
