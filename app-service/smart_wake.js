@@ -33,6 +33,7 @@ try {
 }
 
 let minuteCount = 0
+let wakeTriggered = false
 
 AppService({
   exit() {
@@ -43,6 +44,7 @@ AppService({
   onInit(e) {
     logger.log(`Background service initialized with params: ${e}`)
     minuteCount = 0
+    wakeTriggered = false
 
     if (!vibrator) {
       try {
@@ -67,7 +69,8 @@ AppService({
       minuteCount += 1
       logger.log(`[smart_wake] onPerMinute tick: ${minuteCount}/3 | Time: ${timeSensor.getHours()}:${timeSensor.getMinutes()}:${timeSensor.getSeconds()}`)
 
-      if (minuteCount >= 3) {
+      if (minuteCount >= 3 && !wakeTriggered) {
+        wakeTriggered = true
         logger.log('[smart_wake] Minuto 3 atingido: acionando motor háptico (VIBRATOR_SCENE_TIMER)...')
         try {
           if (vibrator) {
@@ -82,11 +85,18 @@ AppService({
         }
 
         const finishAndExit = () => {
-          logger.log('[smart_wake] Encerrando serviço em segundo plano com this.exit()')
-          if (typeof this.exit === 'function') {
-            this.exit()
-          } else {
+          logger.log('[smart_wake] Encerrando serviço em segundo plano...')
+          try {
+            if (typeof this.exit === 'function') {
+              this.exit()
+            }
+          } catch (e) {
+            logger.error('[smart_wake] Erro em this.exit:', e)
+          }
+          try {
             appServiceMgr.exit()
+          } catch (e) {
+            logger.error('[smart_wake] Erro em appServiceMgr.exit:', e)
           }
         }
 

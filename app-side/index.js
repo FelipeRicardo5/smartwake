@@ -19,7 +19,7 @@ AppSideService({
       if (data && data.action === 'WAKE_UP') {
         console.log('[app-side] Comando WAKE_UP detectado! Disparando requisição HTTP via Fetch API...')
 
-        const webhookUrl = 'https://webhook.site/SEU-ID-AQUI'
+        const webhookUrl = 'https://webhook.site/61ff8681-e75d-48ca-9ac0-bc9a5443e4c2'
 
         fetch({
           url: webhookUrl,

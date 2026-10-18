@@ -313,11 +313,15 @@ export class MessageBuilder extends SimpleEventEmitter {
       logger.warn('BLE send API not available')
       return false
     }
-    const success = this.ble.send(bin.buffer, bin.byteLength)
-    if (!success) {
-      logger.warn('ble.send returned false')
+    try {
+      const buf = bin.buffer ? bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) : bin
+      this.ble.send(buf, bin.byteLength || buf.byteLength)
+      logger.log('ble.send successfully dispatched, bytes:', bin.byteLength || buf.byteLength)
+      return true
+    } catch (e) {
+      logger.error('ble.send error:', e)
+      return false
     }
-    return success
   }
 
   onFragmentData(data) {
@@ -362,7 +366,7 @@ export class MessageBuilder extends SimpleEventEmitter {
   call(data) {
     logger.log('MessageBuilder call() with data:', JSON.stringify(data))
 
-    const sendCallPayload = () => {
+    try {
       const payloadBuf = this.json2Buf(data)
       const traceId = getNextRequestId()
       const spanId = getNextSpanId()
@@ -394,26 +398,11 @@ export class MessageBuilder extends SimpleEventEmitter {
       if (success) {
         return Promise.resolve({ success: true })
       } else {
-        return Promise.reject(new Error('BLE send failed'))
+        return Promise.reject(new Error('BLE send returned false'))
       }
-    }
-
-    if (this.shakeStatus === 3) {
-      return sendCallPayload()
-    } else if (this.shakePromise) {
-      // Wait for handshake with a 3s fallback
-      return Promise.race([
-        this.shakePromise.then(() => sendCallPayload()),
-        new Promise((resolve) => {
-          // Fallback: try sending anyway after 1.5s
-          const t = setTimeout(() => {
-            clearTimeout(t)
-            resolve(sendCallPayload())
-          }, 1500)
-        })
-      ])
-    } else {
-      return sendCallPayload()
+    } catch (err) {
+      logger.error('MessageBuilder call() error:', err)
+      return Promise.reject(err)
     }
   }
 
