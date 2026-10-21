@@ -1,5 +1,6 @@
 import {
   Vibrator,
+  VIBRATOR_SCENE_SHORT_LIGHT,
   VIBRATOR_SCENE_DURATION,
   VIBRATOR_SCENE_STRONG_REMINDER,
   VIBRATOR_SCENE_TIMER
@@ -71,6 +72,10 @@ function notifyStage(stage, name, desc) {
 
 export function isAlarmActive() {
   return isAlarmRunning
+}
+
+export function pulseTick() {
+  pulse(VIBRATOR_SCENE_SHORT_LIGHT)
 }
 
 export function getCurrentStage() {

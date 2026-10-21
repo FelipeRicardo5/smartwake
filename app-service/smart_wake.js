@@ -1,6 +1,7 @@
 import * as appServiceMgr from '@zos/app-service'
 import { log } from '@zos/utils'
 import { Time } from '@zos/sensor'
+import { LocalStorage } from '@zos/storage'
 import * as ble from '@zos/ble'
 import { getPackageInfo } from '@zos/app'
 import { MessageBuilder } from '../shared/message'
@@ -28,6 +29,7 @@ try {
 
 let minuteCount = 0
 let wakeTriggered = false
+let targetMinutes = 20
 
 AppService({
   exit() {
@@ -39,9 +41,25 @@ AppService({
   },
 
   onInit(e) {
-    logger.log(`Background service initialized with params: ${e}`)
     minuteCount = 0
     wakeTriggered = false
+    targetMinutes = 20
+
+    try {
+      if (e && !isNaN(parseInt(e, 10))) {
+        targetMinutes = parseInt(e, 10)
+      } else {
+        const storage = new LocalStorage()
+        const saved = storage.getItem('target_nap_minutes')
+        if (saved && !isNaN(parseInt(saved, 10))) {
+          targetMinutes = parseInt(saved, 10)
+        }
+      }
+    } catch (tErr) {
+      logger.warn('[smart_wake] Failed to resolve targetMinutes, defaulting to 20:', tErr)
+    }
+
+    logger.log(`[smart_wake] Service initialized with target: ${targetMinutes} min (params: ${e})`)
 
     if (messageBuilder) {
       try {
@@ -56,11 +74,11 @@ AppService({
 
     timeSensor.onPerMinute(() => {
       minuteCount += 1
-      logger.log(`[smart_wake] onPerMinute tick: ${minuteCount}/3 | Time: ${timeSensor.getHours()}:${timeSensor.getMinutes()}:${timeSensor.getSeconds()}`)
+      logger.log(`[smart_wake] onPerMinute tick: ${minuteCount}/${targetMinutes} | Time: ${timeSensor.getHours()}:${timeSensor.getMinutes()}:${timeSensor.getSeconds()}`)
 
-      if (minuteCount >= 3 && !wakeTriggered) {
+      if (minuteCount >= targetMinutes && !wakeTriggered) {
         wakeTriggered = true
-        logger.log('[smart_wake] Minuto 3 atingido: iniciando alarme háptico progressivo...')
+        logger.log(`[smart_wake] Alvo de ${targetMinutes} min atingido: iniciando alarme háptico progressivo...`)
 
         startAlarm({
           onStageChange: ({ stage, name, desc }) => {
@@ -76,7 +94,7 @@ AppService({
           logger.log('[smart_wake] Enviando evento WAKE_UP para o Side Service via MessageBuilder...')
           try {
             messageBuilder
-              .call({ action: 'WAKE_UP' })
+              .call({ action: 'WAKE_UP', duration: targetMinutes })
               .then(() => {
                 logger.log('[smart_wake] Evento WAKE_UP despachado com sucesso via MessageBuilder!')
               })
@@ -90,7 +108,7 @@ AppService({
 
         // 2. Envio redundante via BLE direto para garantia máxima de recepção no telemóvel
         try {
-          const rawPayload = Buffer.from(JSON.stringify({ action: 'WAKE_UP' }))
+          const rawPayload = Buffer.from(JSON.stringify({ action: 'WAKE_UP', duration: targetMinutes }))
           const ab = rawPayload.buffer ? rawPayload.buffer.slice(rawPayload.byteOffset, rawPayload.byteOffset + rawPayload.byteLength) : rawPayload
           ble.send(ab, rawPayload.byteLength)
           logger.log('[smart_wake] Pacote raw BLE WAKE_UP despachado com sucesso!')
@@ -98,9 +116,9 @@ AppService({
           logger.warn('[smart_wake] Erro ao despachar pacote raw BLE:', rawErr)
         }
 
-        logger.log('[smart_wake] Pacotes BLE despachados! Mantendo serviço ativo por 60s (até minuto 4) para garantir transmissão completa sem corte precoce de conexão.')
-      } else if (minuteCount > 3 && wakeTriggered) {
-        logger.log('[smart_wake] Minuto 4 atingido. Janela de transmissão BLE garantida. Encerrando serviço...')
+        logger.log('[smart_wake] Pacotes BLE despachados! Mantendo serviço ativo por 60s para garantir transmissão completa sem corte precoce.')
+      } else if (minuteCount > targetMinutes && wakeTriggered) {
+        logger.log('[smart_wake] Janela pós-alarme garantida. Encerrando serviço...')
         try {
           if (typeof this.exit === 'function') {
             this.exit()
