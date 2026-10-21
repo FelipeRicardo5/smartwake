@@ -32,6 +32,14 @@ Page({
   build() {
     logger.debug("page build invoked");
 
+    try {
+      if (typeof hmUI.setStatusBarVisible === "function") {
+        hmUI.setStatusBarVisible(false);
+      }
+    } catch (sbErr) {
+      logger.warn("setStatusBarVisible failed:", sbErr);
+    }
+
     const getSavedNap = () => {
       try {
         const localStorage = new LocalStorage();
