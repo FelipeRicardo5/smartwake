@@ -1,21 +1,15 @@
 import * as appServiceMgr from '@zos/app-service'
 import { log } from '@zos/utils'
-import { Time, Vibrator, VIBRATOR_SCENE_TIMER } from '@zos/sensor'
+import { Time } from '@zos/sensor'
 import * as ble from '@zos/ble'
 import { getPackageInfo } from '@zos/app'
 import { MessageBuilder } from '../shared/message'
+import { startAlarm, stopAlarm, isAlarmActive } from '../shared/alarm_engine'
 
 const logger = log.getLogger('smartwake-service')
 
 // Singletons no escopo raiz do módulo
 const timeSensor = new Time()
-let vibrator = null
-
-try {
-  vibrator = new Vibrator()
-} catch (err) {
-  logger.error('Failed to instantiate Vibrator at top level:', err)
-}
 
 const packageInfo = getPackageInfo ? getPackageInfo() : null
 const appId = packageInfo ? packageInfo.appId : 22062
@@ -38,6 +32,9 @@ let wakeTriggered = false
 AppService({
   exit() {
     logger.log('AppService.exit() invoked')
+    if (isAlarmActive()) {
+      stopAlarm('service_exit')
+    }
     appServiceMgr.exit()
   },
 
@@ -45,14 +42,6 @@ AppService({
     logger.log(`Background service initialized with params: ${e}`)
     minuteCount = 0
     wakeTriggered = false
-
-    if (!vibrator) {
-      try {
-        vibrator = new Vibrator()
-      } catch (err) {
-        logger.error('Failed to instantiate Vibrator in onInit:', err)
-      }
-    }
 
     if (messageBuilder) {
       try {
@@ -71,18 +60,16 @@ AppService({
 
       if (minuteCount >= 3 && !wakeTriggered) {
         wakeTriggered = true
-        logger.log('[smart_wake] Minuto 3 atingido: acionando motor háptico (VIBRATOR_SCENE_TIMER)...')
-        try {
-          if (vibrator) {
-            vibrator.setMode(VIBRATOR_SCENE_TIMER)
-            vibrator.start({ mode: VIBRATOR_SCENE_TIMER })
-            logger.log('[smart_wake] vibrator.start() acionado com sucesso!')
-          } else {
-            logger.error('[smart_wake] Objeto vibrator não está disponível')
+        logger.log('[smart_wake] Minuto 3 atingido: iniciando alarme háptico progressivo...')
+
+        startAlarm({
+          onStageChange: ({ stage, name, desc }) => {
+            logger.log(`[smart_wake] Alarme estágio ${stage}: ${name} (${desc})`)
+          },
+          onFinish: (reason) => {
+            logger.log(`[smart_wake] Alarme finalizado: ${reason}`)
           }
-        } catch (vibErr) {
-          logger.error('[smart_wake] Exceção ao acionar vibrator:', vibErr)
-        }
+        })
 
         // 1. Envia mensagem BLE ao telemóvel via MessageBuilder
         if (messageBuilder) {
@@ -132,5 +119,8 @@ AppService({
 
   onDestroy() {
     logger.log('[smart_wake] Background service destroyed')
+    if (isAlarmActive()) {
+      stopAlarm('service_destroyed')
+    }
   }
 })

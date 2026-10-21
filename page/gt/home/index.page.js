@@ -5,10 +5,17 @@ import { Sleep } from "@zos/sensor";
 import { LocalStorage } from "@zos/storage";
 import { log as Logger } from "@zos/utils";
 import {
+  startAlarm,
+  stopAlarm,
+  isAlarmActive,
+  getCurrentStage,
+} from "../../../shared/alarm_engine";
+import {
   NOTICE_TEXT_STYLE,
   NAP_TEXT_STYLE,
   BTN_STYLE,
   NAP_BTN_STYLE,
+  ALARM_BTN_STYLE,
 } from "zosLoader:./index.page.[pf].layout.js";
 
 const logger = Logger.getLogger("smartwake-page");
@@ -75,6 +82,51 @@ Page({
     const updateNapText = (text) => {
       logger.debug("updateNapText:", text);
       napWidget.setProperty(hmUI.prop.MORE, { text });
+    };
+
+    let alarmBtnWidget = null;
+
+    const updateAlarmBtn = (isActive, label = null) => {
+      if (!alarmBtnWidget) return;
+      const text = label || (isActive ? "Parar Alarme" : "Testar Alarme");
+      const normal_color = isActive ? 0xe74c3c : ALARM_BTN_STYLE.normal_color;
+      const press_color = isActive ? 0xc0392b : ALARM_BTN_STYLE.press_color;
+      alarmBtnWidget.setProperty(hmUI.prop.MORE, {
+        text,
+        normal_color,
+        press_color,
+      });
+    };
+
+    const toggleAlarm = () => {
+      if (isAlarmActive()) {
+        logger.log("Parando alarme manualmente...");
+        stopAlarm("user_dismiss");
+        updateAlarmBtn(false);
+        updateStatusText("Alarme parado manualmente.");
+      } else {
+        logger.log("Iniciando teste de alarme progressivo...");
+        updateAlarmBtn(true, "Parar Alarme");
+        updateStatusText("Estágio 1: Despertar Suave...");
+
+        startAlarm({
+          onStageChange: ({ stage, name, desc }) => {
+            logger.debug(`Alarm stage changed: ${stage} - ${name}`);
+            updateStatusText(`Estágio ${stage}: ${name}`);
+          },
+          onFinish: (reason) => {
+            logger.debug(`Alarm finished, reason: ${reason}`);
+            updateAlarmBtn(false);
+            if (reason === "safety_timeout") {
+              updateStatusText("Alarme finalizado (tempo limite).");
+            } else if (reason === "user_dismiss") {
+              updateStatusText("Alarme parado pelo usuário.");
+            } else {
+              updateStatusText("Alarme finalizado.");
+            }
+          },
+        });
+      }
     };
 
     const startBackgroundService = () => {
@@ -211,7 +263,21 @@ Page({
       },
     });
 
+    alarmBtnWidget = hmUI.createWidget(hmUI.widget.BUTTON, {
+      ...ALARM_BTN_STYLE,
+      click_func: () => {
+        toggleAlarm();
+      },
+    });
+
     // Inicia imediatamente na inicialização da página
     startBackgroundService();
+  },
+
+  onDestroy() {
+    logger.debug("page onDestroy invoked");
+    if (isAlarmActive()) {
+      stopAlarm("page_exit");
+    }
   },
 });
