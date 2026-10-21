@@ -174,14 +174,6 @@ Page({
     // 5. Botão Iniciar Soneca (Primary CTA)
     let startBtnWidget = null;
 
-    const updateStartBtnText = () => {
-      if (startBtnWidget) {
-        startBtnWidget.setProperty(hmUI.prop.MORE, {
-          text: `Iniciar Soneca (${targetDuration}m)`,
-        });
-      }
-    };
-
     // Função central de alteração de duração
     const setDuration = (newVal, source = "tap") => {
       const clamped = Math.max(5, Math.min(120, newVal));
@@ -201,8 +193,7 @@ Page({
         text: `${targetDuration} min`,
       });
 
-      updateStartBtnText();
-      updateChipsHighlight(targetDuration);
+      updateStatusText(`Alvo: ${targetDuration} min`);
       pulseTick();
 
       if (source === "crown" || source === "chip") {
@@ -406,7 +397,7 @@ Page({
     // Criação dos botões inferiores
     startBtnWidget = hmUI.createWidget(hmUI.widget.BUTTON, {
       ...BTN_STYLE,
-      text: `Iniciar Soneca (${targetDuration}m)`,
+      text: "Iniciar Soneca",
       click_func: () => {
         startBackgroundService();
       },
